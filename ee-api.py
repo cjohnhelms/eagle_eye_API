@@ -3,18 +3,14 @@ from requests.auth import HTTPBasicAuth
 import os
 
 uname = str(input('Please provide a username: '))
-password = str(input('Please provide a password: '))
+pword = str(input('Please provide a password: '))
 akey = str(input('Please provide an API key: '))
 url = str(input('Please provide a URL: '))
 
-my_headers = {'content-type': 'application/json', 'Authentication' : akey}
+my_headers = {'content-type':'application/json', 'Authentication':akey}
+my_data = {'username':uname, 'password':pword}
 
 # Authentication
-
-response = requests.post(
-    url,
-    auth=HTTPBasicAuth(uname, password),
-    headers= my_headers
-    )
+response = requests.post(url, headers=my_headers, data=my_data)
 
 print(response)
