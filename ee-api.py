@@ -24,14 +24,14 @@ print(login)
 def get_bridges():
     bridgeList = s.get(url=f'http://{subd}.eagleeyenetworks.com/g/device/list', headers={"Authentication": akey})
     print(bridgeList)
-    print(bridgeList.json)
+    print(bridgeList.json())
 
 # Get Bridge
 def get_bridge():
     pram = input('Please provide a valid ESN: ')
     bridge = s.get(url=f'http://{subd}.eagleeyenetworks.com/g/device', headers={"Authentication": akey}, params={"id": pram})
     print(bridge)
-    bridge = bridge.json()
+    print(bridge.json())
     
 # Get List of Cameras
 def get_cameras():
