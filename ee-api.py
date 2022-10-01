@@ -1,6 +1,4 @@
 from multiprocessing.forkserver import ensure_running
-from pathlib import Path
-from time import sleep
 import requests
 import json
 import pyperclip
