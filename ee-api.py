@@ -5,10 +5,11 @@ import requests
 import json
 import pyperclip
 import webbrowser
+from getpass import getpass
 
 uname = str(input('Please provide a username: '))
-pword = str(input('Please provide a password: '))
-akey = str(input('Please provide an API key: '))
+pword = str(getpass('Please provide a password: '))
+akey = str(getpass('Please provide an API key: '))
 subd = str(input('Please provide the sub domain: '))
 
 s = requests.Session()
