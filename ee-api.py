@@ -6,10 +6,10 @@ import json
 import pyperclip
 import webbrowser
 
-uname = 'cjohnhelms@gmail.com'                        #str(input('Please provide a username: '))
-pword = 'bry25kur64Q.4323'                            #str(input('Please provide a password: '))
-akey = 'ddf9bfba-4006-11ed-b8a3-5e143c58c6f2'         #str(input('Please provide an API key: '))
-subd = 'c013'                                         #str(input('Please provide the sub domain: '))
+uname = str(input('Please provide a username: '))
+pword = str(input('Please provide a password: '))
+akey = str(input('Please provide an API key: '))
+subd = str(input('Please provide the sub domain: '))
 
 s = requests.Session()
 my_headers = {"Content-Type": "application/json", "Authentication": akey}
