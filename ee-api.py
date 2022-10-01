@@ -60,7 +60,7 @@ def ask_params():
     global startts
     global endts
     esn = str(input('Please provide a valid camera ESN: '))
-    startts = str(input('Please provide a start timestamp in format YYYYMMDDHHMMSS.NNN: '))
+    startts = str(input('Please provide a start timestamp in YYYYMMDDHHMMSS.NNN format: '))
     endts = str(input('Please provide an end timestamp in YYYMMDDMMSS.NNN format: '))
     prams = {"id": esn, "start_timestamp": startts, "end_timestamp": endts}
 
