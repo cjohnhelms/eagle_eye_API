@@ -1,4 +1,5 @@
 from multiprocessing.forkserver import ensure_running
+from re import X
 import requests
 import json
 import pyperclip
@@ -9,6 +10,7 @@ uname = str(input('Please provide a username: '))
 pword = str(getpass('Please provide a password: '))
 akey = str(getpass('Please provide an API key: '))
 subd = str(input('Please provide the sub domain: '))
+print('\n')
 
 s = requests.Session()
 my_headers = {"Content-Type": "application/json", "Authentication": akey}
@@ -54,57 +56,74 @@ def get_camera():
     print('\n')
     print(*camera.json(), sep='\n' * 2)
 
+# Ask for the ESN and start/end times for the list of clips
 def ask_params():
     global prams
     global esn
-    global startts
-    global endts
     esn = str(input('Please provide a valid camera ESN: '))
     startts = str(input('Please provide a start timestamp in YYYYMMDDHHMMSS.NNN format: '))
     endts = str(input('Please provide an end timestamp in YYYMMDDMMSS.NNN format: '))
     prams = {"id": esn, "start_timestamp": startts, "end_timestamp": endts}
 
+# Get Video - this code has now been integrated in the get_videos function, but I am leaving here for documentation
+# def get_video():
+#     video = s.get(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4', headers={"Authentication": akey}, params=prams)
+#     print('\n')
+#     if video.status_code == 202:
+#         print(video.json())
+#     if video.status_code == 200:
+#         # pyperclip.copy(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
+#         webbrowser.open(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
+    
 # Get Videos
-def get_videos():
+def get_video():
     videos = s.get(f'https://{subd}.eagleeyenetworks.com/asset/list/video', headers=my_headers, params=prams)
     print(videos)
     print('\n')
+    # print(type(videos.json()))
+    x = 0
     for i in videos.json():
-        print(i)
-
-# Get Video
-def get_video():
-    video = s.get(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4', headers={"Authentication": akey}, params=prams)
+        print('['+str(x)+']'+'\t' + str(i))
+        x += 1
+    print('\n')
+    selection = int(input('Please select a video: '))
+    dic = videos.json()[selection]
+    global vidInfo
+    global stime
+    global etime
+    stime = str(dic['s'])
+    etime = str(dic['e'])
+    vidInfo = {"id": esn, "start_timestamp": stime, "end_timestamp": etime}
+    video = s.get(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4', headers={"Authentication": akey}, params=vidInfo)
     print('\n')
     if video.status_code == 202:
         print(video.json())
     if video.status_code == 200:
-        pyperclip.copy(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
-        webbrowser.open(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
+        # pyperclip.copy(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
+        webbrowser.open(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={stime}&end_timestamp={etime}')
     
 # Check Download
 def check_download():
-    video = s.get(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4', headers={"Authentication": akey}, params=prams)
+    vidCheck = s.get(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4', headers={"Authentication": akey}, params=vidInfo)
     print('\n')
-    if video.status_code == 202:
-        print(video.json())
-    if video.status_code == 200:
-        pyperclip.copy(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
-        webbrowser.open(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
+    if vidCheck.status_code == 202:
+        print(vidCheck.json())
+    if vidCheck.status_code == 200:
+        # pyperclip.copy(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
+        webbrowser.open(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={stime}&end_timestamp={etime}')
 
 
 
 #######################################################################################################################################
 
 menu = {}
-menu['1']="Get List of Bridges" 
-menu['2']="Get Bridge"
-menu['3']="Get List of Cameras"
-menu['4']="Get Camera"
-menu['5']="Get List of Videos"
-menu['6']="Get Video"
-menu['7']="Check Download"
-menu['8']="Exit"
+menu['[1]']="Get List of Bridges" 
+menu['[2]']="Get Bridge"
+menu['[3]']="Get List of Cameras"
+menu['[4]']="Get Camera"
+menu['[5]']="Get Video"
+menu['[6]']="Check Download"
+menu['[7]']="Exit"
 while True: 
     options=menu.keys()
     print('\n')
@@ -121,13 +140,10 @@ while True:
         get_camera()
     elif selection == '5':
         ask_params()
-        get_videos()
-    elif selection == '6':
-        ask_params()
         get_video()
-    elif selection == '7':
+    elif selection == '6':
         check_download()
-    elif selection == '8':
+    elif selection == '7':
         break
     else: 
       print("Unknown Option Selected.")
