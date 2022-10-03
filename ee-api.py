@@ -1,5 +1,7 @@
+from email.headerregistry import HeaderRegistry
 from multiprocessing.forkserver import ensure_running
 from re import X
+from urllib import response
 import requests
 import json
 import pyperclip
@@ -16,15 +18,42 @@ s = requests.Session()
 my_headers = {"Content-Type": "application/json", "Authentication": akey}
 my_data = json.dumps({"username":uname, "password":pword})
 
-# Authentication
-auth_token = s.post(url='https://login.eagleeyenetworks.com/g/aaa/authenticate', headers=my_headers, data=my_data)
-print(auth_token)
+# Authentication and Authorization
 
-# Authorization
-login = s.post('https://login.eagleeyenetworks.com/g/aaa/authorize', headers=my_headers, data=auth_token)
-print(login)
+def authenticate():
+    global auth_token
+    global login
+
+    auth_token = s.post(url='https://login.eagleeyenetworks.com/g/aaa/authenticate', headers=my_headers, data=my_data)
+    print(auth_token)
+
+    login = s.post('https://login.eagleeyenetworks.com/g/aaa/authorize', headers=my_headers, data=auth_token)
+    print(login)
 
 ######################################################################################################################################
+
+# Log in to Sub Account
+def switch_account():
+    accountList = s.get(url=f'https://{subd}.eagleeyenetworks.com/g/account/list', headers=my_headers)
+    print('\n')
+    print(accountList)
+    if accountList.status_code == 200:
+        x = 1
+        for i in accountList.json():
+            print('['+str(x)+']'+'\t' + str(i))
+            x += 1
+            print('\n')
+        selection = int(input('Please select an account: '))
+        targetAccount = {'account_id': accountList.json()[selection - 1]}
+        loginAttempt = s.post(url=f'https://{subd}.eagleeyenetworks.com/g/aaa/switch_account', headers=my_headers, params=targetAccount)
+        print('\n')
+        print(loginAttempt)
+        print('\n')
+        if loginAttempt.status_code == 200:
+            pass
+        else:
+            print('Response code was not 200. Verify you are not already in a sub account')
+
 
 # Get List of Bridges
 def get_bridges():
@@ -81,13 +110,13 @@ def get_video():
     print(videos)
     print('\n')
     # print(type(videos.json()))
-    x = 0
+    x = 1
     for i in videos.json():
         print('['+str(x)+']'+'\t' + str(i))
         x += 1
     print('\n')
     selection = int(input('Please select a video: '))
-    dic = videos.json()[selection]
+    dic = videos.json()[selection - 1]
     global vidInfo
     global stime
     global etime
@@ -116,34 +145,39 @@ def check_download():
 
 #######################################################################################################################################
 
-menu = {}
-menu['[1]']="Get List of Bridges" 
-menu['[2]']="Get Bridge"
-menu['[3]']="Get List of Cameras"
-menu['[4]']="Get Camera"
-menu['[5]']="Get Video"
-menu['[6]']="Check Download"
-menu['[7]']="Exit"
-while True: 
-    options=menu.keys()
-    print('\n')
-    for entry in options: 
-        print(entry, menu[entry])
-    selection=input("\nPlease Select: ")
-    if selection =='1': 
-        get_bridges()
-    elif selection == '2': 
-        get_bridge()
-    elif selection == '3':
-        get_cameras()
-    elif selection == '4': 
-        get_camera()
-    elif selection == '5':
-        ask_params()
-        get_video()
-    elif selection == '6':
-        check_download()
-    elif selection == '7':
-        break
-    else: 
-      print("Unknown Option Selected.")
+authenticate()
+if auth_token.status_code == 200 and  login.status_code == 200:
+    menu = {}
+    menu['[1]']="Switch Account"
+    menu['[2]']="Get List of Bridges" 
+    menu['[3]']="Get Bridge"
+    menu['[4]']="Get List of Cameras"
+    menu['[5]']="Get Camera"
+    menu['[6]']="Get Video"
+    menu['[7]']="Check Download"
+    menu['[8]']="Exit"
+    while True: 
+        options=menu.keys()
+        print('\n')
+        for entry in options: 
+            print(entry, menu[entry])
+        selection=input("\nPlease Select: ")
+        if selection =='1': 
+            switch_account()
+        if selection =='2': 
+            get_bridges()
+        elif selection == '3': 
+            get_bridge()
+        elif selection == '4':
+            get_cameras()
+        elif selection == '5': 
+            get_camera()
+        elif selection == '6':
+            ask_params()
+            get_video()
+        elif selection == '7':
+            check_download()
+        elif selection == '8':
+            break
+        else: 
+            print("Error.")
