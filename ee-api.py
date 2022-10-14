@@ -1,18 +1,24 @@
 from email.headerregistry import HeaderRegistry
 from multiprocessing.forkserver import ensure_running
 from re import X
+from unicodedata import name
 from urllib import response
+from wsgiref import headers
 import requests
 import json
 import pyperclip
 import webbrowser
 from getpass import getpass
 
-uname = str(input('Please provide a username: '))
-pword = str(getpass('Please provide a password: '))
-akey = str(getpass('Please provide an API key: '))
-subd = str(input('Please provide the sub domain: '))
-print('\n')
+debug = 0
+
+if debug == 0:
+    uname = str(input('Please provide a username: '))
+    pword = str(getpass('Please provide a password: '))
+    akey = str(getpass('Please provide an API key: '))
+    subd = str(input('Please provide the sub domain: '))
+    print('\n')
+
 
 s = requests.Session()
 my_headers = {"Content-Type": "application/json", "Authentication": akey}
@@ -109,7 +115,6 @@ def get_video():
     videos = s.get(f'https://{subd}.eagleeyenetworks.com/asset/list/video', headers=my_headers, params=prams)
     print(videos)
     print('\n')
-    # print(type(videos.json()))
     x = 1
     for i in videos.json():
         print('['+str(x)+']'+'\t' + str(i))
@@ -141,11 +146,22 @@ def check_download():
         # pyperclip.copy(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
         webbrowser.open(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={stime}&end_timestamp={etime}')
 
+# Change camera name
+def camera_name():
+    esn = str(input('Please provide a valid camera ESN: '))
+    name = str(input('Please provide the desired camera name: '))
+    prams = {"id": esn, "name": name}
+    newname = s.post(url=f'https://{subd}.eagleeyenetworks.com/g/device', params=prams)
+    print('\n')
+    print(newname)
+    print(newname.json())
+
 
 
 #######################################################################################################################################
 
 authenticate()
+
 if auth_token.status_code == 200 and  login.status_code == 200:
     menu = {}
     menu['[1]']="Switch Account"
@@ -155,7 +171,8 @@ if auth_token.status_code == 200 and  login.status_code == 200:
     menu['[5]']="Get Camera"
     menu['[6]']="Get Video"
     menu['[7]']="Check Download"
-    menu['[8]']="Exit"
+    menu['[8]']="Change Camera Name"
+    menu['[9]']="Exit"
     while True: 
         options=menu.keys()
         print('\n')
@@ -178,6 +195,8 @@ if auth_token.status_code == 200 and  login.status_code == 200:
         elif selection == '7':
             check_download()
         elif selection == '8':
+            camera_name()
+        elif selection == '9':
             break
         else: 
             print("Error.")
