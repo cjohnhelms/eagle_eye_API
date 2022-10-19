@@ -146,8 +146,10 @@ def check_download():
 def batch_retention():
     cameraList = s.get(url=f'http://{subd}.eagleeyenetworks.com/g/device/list', headers={"Authentication": akey}, params={"t": "camera"})
     cameraList = cameraList.json()
+    print('/n')
+    days = input('Please input the number of days for cloud retention: ')
     for i in cameraList:
-        retention = {"id": str(i[1]), "camera_settings_add": "{\"settings\": {\"cloud_retention_days\": 3}}"}
+        retention = {"id": str(i[1]), "camera_settings_add": f"{{\"settings\": {{\"cloud_retention_days\": {days} }}}}"}
         newretention = s.post(url=f'https://{subd}.eagleeyenetworks.com/g/device', headers={"Authentication": akey}, data=retention)
         print(newretention)
 
@@ -157,7 +159,7 @@ def batch_retention():
 #######################################################################################################################################
 
 authenticate()
-
+batch_retention()
 if auth_token.status_code == 200 and  login.status_code == 200:
     menu = {}
     menu['[1]']="Switch Account"
