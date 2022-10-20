@@ -38,13 +38,8 @@ def switch_account():
     print('\n')
     print(accountList)
     if accountList.status_code == 200:
-        x = 1
-        for i in accountList.json():
-            print('['+str(x)+']'+'\t' + str(i))
-            x += 1
-            print('\n')
-        selection = int(input('Please select an account: '))
-        targetAccount = {'account_id': accountList.json()[selection - 1]}
+        accnum = str(input('Please input a valid account number: '))
+        targetAccount = {'account_id': accnum}
         loginAttempt = s.post(url=f'https://{subd}.eagleeyenetworks.com/g/aaa/switch_account', headers=my_headers, params=targetAccount)
         print('\n')
         print(loginAttempt)
