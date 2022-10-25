@@ -172,7 +172,7 @@ if auth_token.status_code == 200 and  login.status_code == 200:
         selection=input("\nPlease Select: ")
         if selection =='1': 
             switch_account()
-        if selection =='2': 
+        elif selection =='2': 
             get_bridges()
         elif selection == '3': 
             get_bridge()
