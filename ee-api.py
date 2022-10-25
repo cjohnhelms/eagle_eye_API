@@ -44,7 +44,7 @@ def switch_account():
             x += 1
             print('\n')
         selection = int(input('Please select an account: '))
-        targetAccount = {'account_id': accountList.json()[selection - 1]}
+        targetAccount = {"account_id": '???'}
         loginAttempt = s.post(url=f'https://{subd}.eagleeyenetworks.com/g/aaa/switch_account', headers=my_headers, params=targetAccount)
         print('\n')
         print(loginAttempt)
@@ -53,6 +53,7 @@ def switch_account():
             pass
         else:
             print('Response code was not 200. Verify you are not already in a sub account')
+            print(loginAttempt.json())
 
 
 # Get List of Bridges
@@ -75,7 +76,8 @@ def get_cameras():
     cameraList = s.get(url=f'http://{subd}.eagleeyenetworks.com/g/device/list', headers={"Authentication": akey}, params={"t": "camera"})
     print(cameraList)
     print('\n')
-    print(*cameraList.json(), sep='\n' * 2)
+    print(cameraList.json())
+    #print(*cameraList.json(), sep='\n' * 2)
 
 # Get Camera
 def get_camera():
@@ -141,11 +143,23 @@ def check_download():
         # pyperclip.copy(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={startts}&end_timestamp={endts}')
         webbrowser.open(f'https://{subd}.eagleeyenetworks.com/asset/play/video.mp4?id={esn}&start_timestamp={stime}&end_timestamp={etime}')
 
+def batch_retention():
+    cameraList = s.get(url=f'http://{subd}.eagleeyenetworks.com/g/device/list', headers={"Authentication": akey}, params={"t": "camera"})
+    cameraList = cameraList.json()
+    print('/n')
+    days = input('Please input the number of days for cloud retention: ')
+    for i in cameraList:
+        retention = {"id": str(i[1]), "camera_settings_add": f"{{\"settings\": {{\"cloud_retention_days\": {days} }}}}"}
+        newretention = s.post(url=f'https://{subd}.eagleeyenetworks.com/g/device', headers={"Authentication": akey}, data=retention)
+        print(newretention)
+
+
 
 
 #######################################################################################################################################
 
 authenticate()
+batch_retention()
 if auth_token.status_code == 200 and  login.status_code == 200:
     menu = {}
     menu['[1]']="Switch Account"
